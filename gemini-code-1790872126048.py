@@ -15,7 +15,7 @@ st.set_page_config(
 # -----------------------------------------------------------------------------
 # 1. DATA FETCHING & CACHING
 # -----------------------------------------------------------------------------
-@st.cache_data(ttl=3600)  # Cache data for 1 hour
+@st.cache_data(ttl=3600)
 def fetch_nhl_standings():
     """Fetches team goals scored/against per game from official NHL API."""
     try:
@@ -40,14 +40,12 @@ def fetch_nhl_standings():
     except Exception:
         pass
 
-    # Fallback Data if API is unavailable
     teams = ["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL", "DAL", "DET", 
              "EDM", "FLA", "LAK", "MIN", "MTL", "NJD", "NSH", "NYI", "NYR", "OTT", 
              "PHI", "PIT", "SEA", "SJS", "STL", "TBL", "TOR", "UTA", "VAN", "VGK", "WPG", "WSH"]
     fallback_df = pd.DataFrame([{'team': t, 'gf_pg': 3.10, 'ga_pg': 3.10} for t in teams]).set_index('team')
     return fallback_df, "Offline Baseline Data"
 
-# Load Standings Data
 df_stats, data_source = fetch_nhl_standings()
 
 # -----------------------------------------------------------------------------
@@ -101,7 +99,6 @@ with col_odds2:
 
 st.sidebar.caption(f"Data Status: **{data_source}**")
 
-# Validation
 if away_team == home_team:
     st.error("Please select two different teams for Away and Home.")
     st.stop()
@@ -118,7 +115,6 @@ home_stat = df_stats.loc[home_team]
 lambda_home = (home_stat['gf_pg'] * away_stat['ga_pg'] / lg_avg_gf) * hia_mult
 lambda_away = (away_stat['gf_pg'] * home_stat['ga_pg'] / lg_avg_gf)
 
-# 10x10 Poisson Matrix
 goals = np.arange(0, 10)
 p_home = stats.poisson.pmf(goals, lambda_home)
 p_away = stats.poisson.pmf(goals, lambda_away)
@@ -143,7 +139,6 @@ kelly_home = kelly_criterion(p_home_win, home_market_odds)
 st.title("🏒 NHL Betting Projection & +EV Value Finder")
 st.markdown(f"### Matchup Breakdown: **{away_team}** @ **{home_team}**")
 
-# Top Metric Cards
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Projected Total Goals", f"{lambda_away + lambda_home:.2f}", delta=f"{lambda_away:.2f} - {lambda_home:.2f}")
 col2.metric(f"{away_team} Win Prob", f"{p_away_win*100:.1f}%", delta=f"Fair Odds: {prob_to_american(p_away_win):+d}")
@@ -151,8 +146,6 @@ col3.metric(f"{home_team} Win Prob", f"{p_home_win*100:.1f}%", delta=f"Fair Odds
 col4.metric("OT/Shootout Prob", f"{p_tie*100:.1f}%")
 
 st.markdown("---")
-
-# Projection & +EV Table Summary
 st.subheader("📈 Moneyline & +EV Edge Analysis")
 
 summary_df = pd.DataFrame([
@@ -178,17 +171,14 @@ summary_df = pd.DataFrame([
 
 st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
-# Value Alert Boxes
 if ev_away > 0:
     st.success(f"🎯 **VALUE FOUND!** {away_team} has a **{ev_away:+.2f}% Expected Value** at market odds of {away_market_odds:+d}. Recommended Stake: **{kelly_away:.2f}% of bankroll**.")
 if ev_home > 0:
     st.success(f"🎯 **VALUE FOUND!** {home_team} has a **{ev_home:+.2f}% Expected Value** at market odds of {home_market_odds:+d}. Recommended Stake: **{kelly_home:.2f}% of bankroll**.")
 if ev_away <= 0 and ev_home <= 0:
-    st.info("ℹ️️ No positive expected value (+EV) edge found at the given sportsbook lines.")
+    st.info("ℹ️ No positive expected value (+EV) edge found at the given sportsbook lines.")
 
 st.markdown("---")
-
-# Score Matrix Display
 st.subheader("📊 Score Probability Matrix (10x10 Poisson Distribution)")
 
 matrix_df = pd.DataFrame(
@@ -198,4 +188,3 @@ matrix_df = pd.DataFrame(
 )
 
 st.dataframe(matrix_df.style.format("{:.2f}%").background_gradient(cmap="Blues"), use_container_width=True)
-
