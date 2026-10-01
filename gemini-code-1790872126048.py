@@ -198,3 +198,8 @@ matrix_df = pd.DataFrame(
 )
 
 st.dataframe(matrix_df.style.format("{:.2f}%").background_gradient(cmap="Blues"), use_container_width=True)
+streamlit>=1.25.0
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+requests>=2.28.0
