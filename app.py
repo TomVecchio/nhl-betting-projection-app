@@ -40,7 +40,7 @@ def fetch_nhl_standings():
     except Exception:
         pass
 
-    teams = ["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL", "DAL", "DET", 
+    team_list = ["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL", "DAL", "DET", 
              "EDM", "FLA", "LAK", "MIN", "MTL", "NJD", "NSH", "NYI", "NYR", "OTT", 
              "PHI", "PIT", "SEA", "SJS", "STL", "TBL", "TOR", "UTA", "VAN", "VGK", "WPG", "WSH"]
     fallback_df = pd.DataFrame([{'team': t, 'gf_pg': 3.10, 'ga_pg': 3.10} for t in teams]).set_index('team')
